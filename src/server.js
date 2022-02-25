@@ -75,36 +75,28 @@ wsServer.on("connection", (socket) => {
   });
 
   socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
+
+  socket.on("message", (msg) => {
+    // 받아온 문자열을 js obj로 변경하기 위해 parse tkdyd
+    const message = JSON.parse(msg);
+
+    switch (message.type) {
+      case "new_message": // type이 new_message일 때만 front에 send
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname} : ${message.payload}`)
+        );
+        break;
+      case "nickname": // type이 nickname이면 socket["nickname"] 초기화
+        socket["nickname"] = message.payload;
+        break;
+
+      default:
+        break;
+    }
+  });
 });
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 httpServer.listen(3000, handleListen);
-
-// wss.on("connection", (socket) => {
-//   sockets.push(socket);
-//   socket["nickname"] = "Anonymous";
-
-//   console.log("Connected to Browser V");
-
-//   socket.on("close", () => {
-//     console.log("Disconnected from the Browser X");
-//   });
-
-//   socket.on("message", (msg) => {
-//     // 받아온 문자열을 js obj로 변경하기 위해 parse tkdyd
-//     const message = JSON.parse(msg);
-
-//     switch (message.type) {
-//       case "new_message": // type이 new_message일 때만 front에 send
-//         sockets.forEach((aSocket) =>
-//           aSocket.send(`${socket.nickname} : ${message.payload}`)
-//         );
-//         break;
-//       case "nickname": // type이 nickname이면 socket["nickname"] 초기화
-//         socket["nickname"] = message.payload;
-//         break;
-//     }
-//   });
-// });
 
 // server.listen(3000, handleListen);
